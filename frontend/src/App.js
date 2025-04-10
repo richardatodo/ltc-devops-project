@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styles from './App.module.css';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+// const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = '/api'; // Use relative path for proxy
 
 const TvShowList = ({ onSelectShow }) => {
   const [shows, setShows] = useState([]);
