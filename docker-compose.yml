@@ -22,7 +22,7 @@ services:
     environment:
       # Pass necessary environment variables to the backend
       - AWS_REGION=${AWS_REGION} # Reads from your host env or .env file
-      - DYNAMODB_TABLE_NAME=${DYNAMODB_TABLE_NAME}
+      - DYNAMODB_TABLE_NAME=${DYNAMODB_TABLE}
     networks:
       - app-network
     # Note: Backend doesn't need 'ports' exposed unless you want direct host access
