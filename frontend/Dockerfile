@@ -18,7 +18,7 @@ RUN npm run build
 
 # ---- Stage 2: Serve ----
 # Use a lightweight Nginx image to serve the static files
-FROM nginx:1.25-alpine
+FROM nginx:1.26-alpine
 
 # Copy the custom Nginx configuration
 # This replaces the default Nginx config
