@@ -29,7 +29,7 @@ aws_region = os.getenv("AWS_REGION")  # Default region if not specified
 dynamodb = boto3.resource('dynamodb', region_name=aws_region)
 
 # Get a reference to the table
-table_name = os.getenv("DYNAMODB_TABLE_NAME")
+table_name = os.getenv("DYNAMODB_TABLE")
 tv_shows_table = dynamodb.Table(table_name)
 
 @app.get("/")
