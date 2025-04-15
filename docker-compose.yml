@@ -18,7 +18,7 @@ services:
     build:
       context: ./api # Path to backend Dockerfile + code
       dockerfile: Dockerfile
-    image: your-fastapi-app # Optional: name the built image
+    image: fastapi-backend-app # Optional: name the built image
     environment:
       # Pass necessary environment variables to the backend
       - AWS_REGION=${AWS_REGION} # Reads from your host env or .env file

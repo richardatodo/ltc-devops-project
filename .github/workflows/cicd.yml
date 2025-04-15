@@ -1,0 +1,88 @@
+name: CI/CD Docker Build and Push to ECR
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [ main ] # Trigger on pushes to the main branch
+  pull_request:
+    branches: [ main ] # Trigger on pull requests to the main branch
+
+env:
+  # Define AWS ECR repository names (replace with your actual ECR repo names)
+  # ECR Registry URL will be constructed later using AWS Account ID and Region
+  ECR_REPOSITORY_BACKEND: rykard/backend
+  ECR_REPOSITORY_FRONTEND: rykard/frontend
+
+jobs:
+  build_and_push_ecr:
+    name: Build and Push Docker Images to ECR
+    runs-on: ubuntu-latest # Use the latest Ubuntu runner
+
+    # Permissions needed for OIDC with AWS and reading repo contents
+    permissions:
+      id-token: write # Required for requesting the JWT ID token for OIDC
+      contents: read  # Required for actions/checkout
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }} # GitHub Secret: ARN of IAM role
+          aws-region: ${{ secrets.AWS_REGION }}             # GitHub Secret: AWS Region (e.g., us-east-1)
+
+      - name: Login to Amazon ECR
+        id: login-ecr # Give this step an ID to reference its outputs
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Docker Hub Login step removed
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # --- Backend Image ---
+      - name: Extract metadata (tags, labels) for Backend ECR
+        id: meta_backend # Give step an ID
+        uses: docker/metadata-action@v5
+        with:
+          images: | # List image for ECR ONLY
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_BACKEND }}
+          tags: | # Define tags - use Git SHA and 'latest' for main branch pushes
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Backend image to ECR
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend # Assumes backend Dockerfile is in './backend' directory
+          file: ./backend/Dockerfile # Explicit path to backend Dockerfile
+          push: ${{ github.event_name == 'push' }} # Only push on 'push' events (not pull_request)
+          tags: ${{ steps.meta_backend.outputs.tags }}
+          labels: ${{ steps.meta_backend.outputs.labels }}
+          cache-from: type=gha # Enable GitHub Actions cache for build layers
+          cache-to: type=gha,mode=max
+
+      # --- Frontend Image ---
+      - name: Extract metadata (tags, labels) for Frontend ECR
+        id: meta_frontend # Give step an ID
+        uses: docker/metadata-action@v5
+        with:
+          images: | # List image for ECR ONLY
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_FRONTEND }}
+          tags: | # Define tags - use Git SHA and 'latest' for main branch pushes
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Frontend image to ECR
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend # Assumes frontend Dockerfile is in './frontend' directory
+          file: ./frontend/Dockerfile # Explicit path to frontend Dockerfile
+          push: ${{ github.event_name == 'push' }} # Only push on 'push' events (not pull_request)
+          tags: ${{ steps.meta_frontend.outputs.tags }}
+          labels: ${{ steps.meta_frontend.outputs.labels }}
+          cache-from: type=gha # Enable GitHub Actions cache for build layers
+          cache-to: type=gha,mode=max
+

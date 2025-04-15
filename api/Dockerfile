@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # Set the working directory in the container
-WORKDIR /api
+WORKDIR /app
 
 # --- Install Dependencies ---
 COPY requirements.txt .
