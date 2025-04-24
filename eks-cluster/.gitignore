@@ -1,0 +1,42 @@
+# Ignore Terraform state files and lock files
+.terraform/
+.terraform.lock.hcl
+.terraform.lock.*
+terraform.tfstate
+terraform.tfstate.*
+# Ignore backend configuration files
+backend*
+# Ignore tfvars files (often contain sensitive data)
+*.tfvars
+.tfvars.json
+# Ignore sensitive keys
+key
+key*
+key.pub
+key.*
+*.key
+wg-configs/*
+# Ignore environment and configuration files
+ansible/inventory.ini
+ansible/group_vars/*.yml
+ARM_envs.env
+# Ignore local Terraform plan output
+*.tfplan
+# Ignore crash logs and debugging files
+crash.log
+*.log
+# Ignore any archive or compressed files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+# Ignore editor-specific and OS-specific files
+*.swp
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+# Wireguard rules
+ansible/roles/wireguard/files/wg*
+ansible/roles/worker/files/wg*
+.aider*
