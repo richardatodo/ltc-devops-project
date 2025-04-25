@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket         = "ltc-devops-project-tf-state"
+    bucket         = "ltc-devops-project5-tf-state"
     key            = "eks-cluster/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "terraform-eks-state-locking"
