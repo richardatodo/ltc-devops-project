@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment # Name of the Deployment
+  labels:
+    app: frontend           # Label for grouping resources related to the frontend
+spec:
+  replicas: 2              # Start with 2 instances of the frontend Pod for availability
+  selector:
+    matchLabels:
+      app: frontend         # Selects Pods with this label
+  template:
+    metadata:
+      labels:
+        app: frontend       # Label applied to the Pods created by this Deployment
+    spec:
+      containers:
+      - name: frontend-container
+        # Replace with your actual frontend image URI from ECR
+        image: 617439230997.dkr.ecr.us-east-1.amazonaws.com/rykard/frontend 
+        ports:
+        - containerPort: 80 # The port Nginx listens on inside the container
+        # Optional: Resource requests and limits
+        # resources:
+        #   requests:
+        #     memory: "64Mi"
+        #     cpu: "100m" # 0.1 vCPU
+        #   limits:
+        #     memory: "128Mi"
+        #     cpu: "250m" # 0.25 vCPU
+---
+# frontend-service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service # Name of the Service
+  # Optional, but recommended: Annotations for AWS Load Balancer Controller
+  # These configure the type and behavior of the AWS Load Balancer created.
+  # Requires the AWS Load Balancer Controller to be installed in your cluster.
+  # annotations:
+    # Use Network Load Balancer (NLB) for performance, or Application Load Balancer (ALB) for richer features
+    # service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    # Or for ALB (often used with Ingress instead of Service type LoadBalancer):
+    # service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    # service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+spec:
+  selector:
+    app: frontend        # Selects Pods managed by the frontend-deployment
+  ports:
+    - protocol: TCP
+      port: 80           # Port the Load Balancer will listen on (external traffic)
+      targetPort: 80     # Port on the Pods (frontend-container) to forward traffic to
+  type: LoadBalancer   # Exposes the service externally using a cloud provider's load balancer.
+                       # On AWS EKS, this will provision an AWS Elastic Load Balancer (Classic or Network).
