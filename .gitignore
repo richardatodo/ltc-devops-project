@@ -1,0 +1,72 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignore Terraform state files and lock files
+.terraform/
+.terraform.lock.hcl
+.terraform.lock.*
+terraform.tfstate
+terraform.tfstate.*
+
+# Ignore tfvars files (often contain sensitive data)
+*.tfvars
+.tfvars.json
+# Ignore sensitive keys
+key
+key*
+key.pub
+key.*
+*.key
+wg-configs/*
+# Ignore environment and configuration files
+ansible/inventory.ini
+ansible/group_vars/*.yml
+ARM_envs.env
+# Ignore local Terraform plan output
+*.tfplan
+# Ignore crash logs and debugging files
+crash.log
+*.log
+# Ignore any archive or compressed files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+# Ignore editor-specific and OS-specific files
+*.swp
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+# Wireguard rules
+ansible/roles/wireguard/files/wg*
+ansible/roles/worker/files/wg*
+.aider*
+
+# Ignore Kubernetes-specific files
+kubeconfig.yaml
+.kube/
+
+# Ignore YAML files with sensitive data (adjust as needed)
+backend-configmap.yaml
