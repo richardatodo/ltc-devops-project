@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment # Name of the Deployment
+  labels:
+    app: backend          # Label for grouping resources related to the backend
+spec:
+  replicas: 2             # Start with 2 instances of the backend Pod for availability
+  selector:
+    matchLabels:
+      app: backend        # Selects Pods with this label
+  template:
+    metadata:
+      labels:
+        app: backend      # Label applied to the Pods created by this Deployment
+    spec:
+      # IMPORTANT: Specify the ServiceAccount configured with IRSA for DynamoDB access
+      serviceAccountName: backend-service-account # Replace if you use a different name
+      containers:
+      - name: backend-container
+        # Backend image URI from ECR
+        image: 617439230997.dkr.ecr.us-east-1.amazonaws.com/rykard/backend # Or use a specific SHA tag
+        ports:
+        - containerPort: 8000 # The port your FastAPI app listens on inside the container
+        env: 
+        - name: AWS_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config # Name of the ConfigMap containing AWS_REGION
+              key: AWS_REGION      # Key in the ConfigMap
+        - name: DYNAMODB_TABLE
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config # Name of the ConfigMap containing DYNAMODB_TABLE
+              key: DYNAMODB_TABLE  # Key in the ConfigMap
+        # Optional: Resource requests and limits for resource management
+        # resources:
+        #   requests:
+        #     memory: "128Mi"
+        #     cpu: "250m" # 0.25 vCPU
+        #   limits:
+        #     memory: "256Mi"
+        #     cpu: "500m" # 0.5 vCPU
+---
+# backend-service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service # Name of the Service - used by frontend proxy
+spec:
+  selector:
+    app: backend       # Selects Pods managed by the backend-deployment
+  ports:
+    - protocol: TCP
+      port: 8000         # Port the Service will listen on (internal cluster communication)
+      targetPort: 8000   # Port on the Pods (backend-container) to forward traffic to
+  type: ClusterIP      # Exposes the service on a cluster-internal IP. Only reachable from within the cluster.
+                       # This is appropriate as only the frontend Nginx needs to talk to it.
